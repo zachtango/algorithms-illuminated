@@ -82,7 +82,9 @@ using std::istringstream;
     algorithm to compute, for each vertex v in V, the smallest bottleneck
     of any s-v path. Your algorithm should run in O(mn) time, where m
     and n denote the number of edges and vertices, respectively.
-        ???
+        1. Rather than get the minimum distance, we would define dist[v] as the minimum bottleneck of all paths to s - v.
+        2. In each iteration of Djikstra's, we would then find the minimum bottlneck from (v, w) where v in visited and w not in visited
+            dist[v] = min(dist[v], max(dist[u], weight(u, v)))
     
     Problem 9.8 Implement in your favorite programming language the
     Dijkstra algorithm from Section 9.2, and use it to solve the singlesource shortest path problem in different directed graphs. With
