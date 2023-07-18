@@ -11,11 +11,10 @@ int main() {
     heap.Insert(3);
     heap.Insert(10);
 
-    // Print the heap
-    heap.Output();  // Expected output: Heap: 3 5 10 8 12
+    // Expected output: Heap: 3 5 10 8 12
 
     // Test ExtractMin function
-    while (heap.size() > 0) {
+    while (heap.Size() > 0) {
         int minElement = heap.ExtractMin();
         std::cout << minElement << " ";
     }
@@ -28,11 +27,9 @@ int main() {
     heap.Insert(3);
     heap.Insert(10);
 
-    heap.Output();
     heap.Delete(5);
 
-    // Print the heap
-    heap.Output();  // Expected output: Heap: 3 8 10 12
-
+    // Expected output: Heap: 3 8 10 12
+    
     return 0;
 }

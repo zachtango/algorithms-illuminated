@@ -1,33 +1,42 @@
-#ifndef HEAP_H
-#define HEAP_H
-
 #include <unordered_map>
+#include <algorithm>
+#include <exception>
+#include <iostream>
 
 /*
-    For the sake of simplicity, this heap only works with unique elements
+    Heap operations
+    - Insert
+    - ExtractMin
+    - Delete
+    - FindMin
 */
+
+const int DEFAULT_HEAP_SIZE = 10;
+
 template <typename T>
 class Heap {
 private:
     T *elements;
-    std::unordered_map<T, int> elementsToI;
-
     int n;
     int nextI;
+    
+    std::unordered_map<T, int> elementToI;
 
     int parent(int i) { return i / 2; }
     int leftChild(int i) { return 2 * i; }
     int rightChild(int i) { return 2 * i + 1; }
 
+    void bubbleUp(int i);
     void bubbleDown(int i);
+
 public:
     Heap() {
-        elements = new T[10];
-        n = 10;
+        n = DEFAULT_HEAP_SIZE;
+        elements = new T[n];
         nextI = 0;
     }
 
-    int size() { return nextI; }
+    int Size() { return nextI; }
 
     void Insert(T element);
 
@@ -35,11 +44,114 @@ public:
 
     void Delete(T element);
 
-    void Output();
+    T FindMin();
 
-    T FindMin() { return elements[0]; }
+    ~Heap() {
+        delete[] elements;
+    }
 };
 
-#include "Heap.cpp"
+template <typename T>
+void Heap<T>::bubbleUp(int i) {
 
-#endif
+    int p = parent(i);
+
+    while (elements[i] < elements[p]) {
+        std::swap(elements[i], elements[p]);
+        elementToI[elements[i]] = i;
+        i = p;
+        p = parent(i);
+    }
+
+    elementToI[elements[i]] = i;
+}
+
+template <typename T>
+void Heap<T>::bubbleDown(int i) {
+
+    int l = leftChild(i);
+    int r = rightChild(i);
+
+    while (l < nextI) {
+        T *smaller;
+        int c;
+        if (r >= nextI || elements[l] < elements[r]) {
+            smaller = &elements[l];
+            c = l;
+        } else {
+            smaller = &elements[r];
+            c = r;
+        }
+
+        if (*smaller < elements[i]) {
+            std::swap(*smaller, elements[i]);
+            elementToI[elements[i]] = i;
+        } else {
+            break;
+        }
+
+        i = c;
+        l = leftChild(i);
+        r = leftChild(i);
+    }
+
+    elementToI[elements[i]] = i;
+}
+
+template <typename T>
+void Heap<T>::Insert(T element) {
+
+    if (elementToI.count(element) == 1) {
+        throw std::runtime_error("Cannot insert element: element already exists");
+    }
+
+    if (nextI == n) {
+        T *newElements = new T[2 * n];
+        std::copy(elements, elements + nextI, newElements);
+
+        delete[] elements;
+
+        elements = newElements;
+    }
+
+    elements[nextI] = element;
+
+    // Bubble up as needed to maintain heap invariant
+    bubbleUp(nextI);
+
+    nextI += 1;
+}
+
+template <typename T>
+T Heap<T>::ExtractMin() {
+    T minElement = FindMin();
+
+    Delete(minElement);
+
+    return minElement;
+}
+
+template <typename T>
+void Heap<T>::Delete(T element) {
+    if (elementToI.count(element) == 0) {
+        throw std::runtime_error("Cannot delete element: element does not exist");
+    }
+
+    nextI -= 1;
+    
+    int i = elementToI[element];
+
+    std::swap(elements[i], elements[nextI]);
+
+    bubbleDown(i);
+
+    elementToI.erase(element);
+}
+
+template <typename T>
+T Heap<T>::FindMin() {
+    if (nextI == 0) {
+        throw std::runtime_error("Cannot find min element: heap is empty");
+    }
+    return elements[0];
+}
