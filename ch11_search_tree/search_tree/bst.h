@@ -15,9 +15,9 @@ private:
 
         T val;
 
-        Node () : left(nullptr), right(nullptr), parent(nullptr), val(0), size(1) {}
+        Node () : left(nullptr), right(nullptr), parent(nullptr), size(1), val(0) {}
         Node (Node* left, Node *right, Node *parent, T val) :
-                left(left), right(right), parent(parent), val(val), size(1) {}
+                left(left), right(right), parent(parent), size(1), val(val) {}
     };
 
     Node *sentinel;
