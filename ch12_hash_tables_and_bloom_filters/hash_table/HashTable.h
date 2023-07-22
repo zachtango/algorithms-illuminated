@@ -47,9 +47,19 @@ public:
     
     void Insert(int k, T obj) {
         auto &bucket = A[_Hash(k)];
+        auto it = bucket.begin();
+
+        while (it != bucket.end()) {
+            if (it->k == k) {
+                it->obj = obj;
+                return;
+            }
+            it++;
+        }
+
         bucket.push_front(Node(k, obj));
 
-        size += 1;
+        size += 1
 
         double load = (double) size / (double) n;
         
@@ -65,12 +75,11 @@ public:
         while (it != bucket.end()) {
             if (it->k == k) {
                 bucket.erase(it);
+                size -= 1;
                 break;
             }
             it++;
         }
-
-        size -= 1;
     }
 
     T &Search(int k) {
