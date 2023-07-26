@@ -1,4 +1,5 @@
 #include "../include/Edge.h"
+#include "UnionFind.h"
 #include <vector>
 using std::vector;
 #include <set>
@@ -29,7 +30,8 @@ bool hasCycle(const al &graph, int v, int p, unordered_set<int> &visited) {
     return false;
 }
 
-vector<Edge> kruskals(const al &graph) {
+// O(n^2) implementation
+vector<Edge> kruskalsSlow(const al &graph) {
     int n = graph.size();
     
     vector<Edge> edges;
@@ -67,6 +69,33 @@ vector<Edge> kruskals(const al &graph) {
     return mst;
 }
 
+// O(nlogn) implementation Union Find
+vector<Edge> kruskals(const al &graph) {
+    int n = graph.size();
+
+    vector<Edge> edges;
+    for (int v = 0; v < n; v++) {
+        for (auto &e : graph[v]) {
+            edges.push_back({v, e.b, e.weight});
+        }
+    }
+    sort(edges.begin(), edges.end());
+
+    UnionFind uf(n);
+
+    vector<Edge> mst;
+
+    for (auto &e : edges) {
+        if (uf.Find(e.a) == uf.Find(e.b)) {
+            continue;
+        }
+        uf.Union(e.a, e.b);
+        mst.push_back(e);
+    }
+
+    return mst;
+}
+
 
 int main() {
     al testGraph1 = {
@@ -98,7 +127,7 @@ int main() {
     std::vector<Edge> expectedResult2 = {
         Edge(0, 1, 3), Edge(1, 2, 4), Edge(2, 3, 5)
     };
-    
+
     vector<Edge> result2 = kruskals(testGraph2);
 
     sort(expectedResult2.begin(), expectedResult2.end());
