@@ -10,41 +10,32 @@ vector<int> mwis(vector<int> pathGraph) {
     int n = pathGraph.size();
 
     vector<int> W(n + 1);
-    vector<int> prevV(n + 1);
     
     /*
         W0 = 0
         W1 = pathGraph[0]
         Wi = max(Wi - 1, Wi - 2 + pathGraph[i - 1]) for i = 2 to n
     */
-    
     W[0] = 0;
     W[1] = pathGraph[0];
-    prevV[0] = 0;
-    prevV[1] = W[1] > 0 ? 1 : 0;
-
     for (int i = 2; i <= n; i++) {
-        int a = W[i - 1];
-        int b = W[i - 2] + pathGraph[i - 1];
-
-        if (a > b) {
-            W[i] = a;
-            prevV[i] = i - 1;
-        } else {
-            W[i] = b;
-            prevV[i] = i;
-            cout << i << " set\n";
-        }
+        W[i] = max(W[i - 1], W[i - 2] + pathGraph[i - 1]);
     }
 
+    // Reconstruction
     vector<int> s;
-    for (int i = n; i > 0; ) {
-        if (prevV[i] == i) {
+    int i = n;
+    while (i >= 2) {
+        if (W[i - 2] + pathGraph[i - 1] >= W[i - 1]) {
             s.push_back(i - 1);
             i -= 2;
         } else {
             i -= 1;
         }
+    }
+
+    if (i == 1 && n >= 1 && pathGraph[0] >= 0) {
+        s.push_back(0);
     }
 
     return s;
@@ -73,11 +64,10 @@ int main() {
 
     // Test Case 3: All Negative Weights
     {
-        cout << "Case 3\n";
         vector<int> input = {-2, -5, -10, -1};
         vector<int> expected = {};
         vector<int> result = mwis(input);
-
+    
         assert(result == expected);
     }
 
@@ -86,6 +76,7 @@ int main() {
         vector<int> input = {7};
         vector<int> expected = {0};
         vector<int> result = mwis(input);
+
         assert(result == expected);
     }
 
@@ -96,11 +87,6 @@ int main() {
         vector<int> input = {3, 5, 2, 9, 8, 6, 10, 2, 7};
         vector<int> expected = {8, 6, 3, 1};
         vector<int> result = mwis(input);
-
-        for(auto &v : result) {
-            cout << v << ' ';
-        }
-        cout << '\n';
 
         assert(result == expected);
     }
