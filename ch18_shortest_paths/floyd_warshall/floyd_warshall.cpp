@@ -3,13 +3,60 @@ using std::cout;
 #include <vector>
 using std::vector;
 #include <algorithm>
+using std::reverse;
 using std::min;
 #include <stdexcept>
 using std::runtime_error;
+#include <string>
+using std::to_string;
+#include <functional>
+using std::function;
 
 typedef vector<vector<vector<int>>> al;
 
 #define INF 10000000
+
+
+void printResult(const vector<vector<vector<int>>> &result) {
+    int n = result.size() - 1;
+
+    for (int k = 0; k <= n; k++) {
+        cout << "k: " << k << '\n';
+        for (int s = 1; s <= n; s++) {
+            for (int v = 1; v <= n; v++) {
+                if (result[k][s][v] == INF) {
+                    cout << "INF ";
+                } else {
+                    cout << result[k][s][v] << ' ';
+                }
+            }
+            cout << '\n';
+        }
+    }
+
+    for (int s = 1; s <= n; s++) {
+        cout << "s: " << s << '\n';
+        for (int v = 1; v <= n; v++) {
+            cout << v << ' ' << result[n][s][v] << '\n';
+        }
+        cout << '\n';
+    }
+}
+
+void printPaths(const vector<vector<vector<int>>> &paths) {
+    int n = paths.size() - 1;
+
+    for (int s = 1; s <= n; s++) {
+        for (int v = 1; v <= n; v++) {
+            cout << s << " to " << v << ": ";
+            for (auto &w : paths[s][v]) {
+                cout << w << ' ';
+            }
+            cout << '\n';
+        }
+    }
+
+}
 
 // Input directed graph
 vector<vector<vector<int>>> floydWarshall(const al &graph) {
@@ -31,7 +78,7 @@ vector<vector<vector<int>>> floydWarshall(const al &graph) {
         for (auto &edge : graph[v]) {
             int neighbor = edge[0],
                 weight = edge[1];
-            
+
             L[0][v][neighbor] = weight;
         }
     }
@@ -57,16 +104,99 @@ vector<vector<vector<int>>> floydWarshall(const al &graph) {
     return L;
 }
 
-void printResult(const vector<vector<vector<int>>>& result) {
-    int n = result.size() - 1;
+vector<vector<vector<int>>> reconstruction(const al &graph) {
+    int n = graph.size() - 1;
+
+    vector<vector<vector<int>>> L(n + 1, vector<vector<int>>(n + 1, vector<int>(n + 1)));
+    
+    // Base cases
+    for (int s = 1; s <= n; s++) {
+        for (int v = 1; v <= n; v++) {
+            if (s == v) {
+                L[0][s][v] = 0;
+            } else {
+                L[0][s][v] = INF;
+            }
+        }   
+    }
+    for (int v = 1; v <= n; v++) {
+        for (auto &edge : graph[v]) {
+            int neighbor = edge[0],
+                weight = edge[1];
+
+            L[0][v][neighbor] = weight;
+        }
+    }
+
+    vector<vector<int>> B(n + 1, vector<int>(n + 1));
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= n; j++) {
+            B[i][j] = -1;
+        }
+    }
+
+    // Recurrence
+    for (int k = 1; k <= n; k++) {
+        for (int s = 1; s <= n; s++) {
+            for (int v = 1; v <= n; v++) {
+                if (L[k - 1][s][v] > L[k - 1][s][k] + L[k - 1][k][v]) {
+                    L[k][s][v] = L[k - 1][s][k] + L[k - 1][k][v];
+                    B[s][v] = k;
+                } else {
+                    L[k][s][v] = L[k - 1][s][v];
+                }
+            }
+        }
+    }
+
+    // printResult(L);
+
+    // Check for negative cycle
+    for (int k = 0; k <= n; k++) {
+        for (int v = 1; v <= n; v++) {
+            if (L[k][v][v] < 0) {
+                throw runtime_error("Negative Cycle in Graph");
+            }
+        }
+    }
+
+    vector<vector<vector<int>>> paths(n + 1, vector<vector<int>>(n + 1));
 
     for (int s = 1; s <= n; s++) {
-        cout << "s: " << s << '\n';
         for (int v = 1; v <= n; v++) {
-            cout << v << ' ' << result[n][s][v] << '\n';
+            cout << B[s][v] << ' ';
         }
         cout << '\n';
     }
+
+    function<vector<int>(int, int)> bestPath = [&bestPath, &B, &paths](int s, int v) {
+        if (B[s][v] == -1) {
+            return vector<int>();
+        }
+        int w = B[s][v];
+
+        vector<int> p1 = bestPath(s, w);
+        p1.push_back(w);
+        vector<int> p2 = bestPath(w, v);
+        p1.insert(p1.end(), p2.begin(), p2.end());
+
+        return p1;
+    };
+
+    for (int s = 1; s <= n; s++) {
+        for (int v = 1; v <= n; v++) {
+            if (L[n][s][v] > INF - 10000) {
+                continue;
+            }
+
+            paths[s][v] = {s};
+            auto p = bestPath(s, v);
+            paths[s][v].insert(paths[s][v].end(), p.begin(), p.end());
+            paths[s][v].push_back(v);
+        }
+    }
+
+    return paths;
 }
 
 int main() {
@@ -100,18 +230,22 @@ int main() {
     try {
         cout << "Result for Test Case 1:\n";
         vector<vector<vector<int>>> result1 = floydWarshall(graph1);
-        printResult(result1);
+
+        vector<vector<vector<int>>> paths1 = reconstruction(graph1);
+        printPaths(paths1);
 
         cout << "\nResult for Test Case 2:\n";
         vector<vector<vector<int>>> result2 = floydWarshall(graph2);
-        printResult(result2);
+        vector<vector<vector<int>>> paths2 = reconstruction(graph2);
+        printPaths(paths2);
 
         cout << "\nResult for Test Case 3:\n";
         vector<vector<vector<int>>> result3 = floydWarshall(graph3);
-        printResult(result3);
+        vector<vector<vector<int>>> paths3 = reconstruction(graph3);
+        printPaths(paths3);
 
-        cout << "\nResult for Test Case 4:\n";
-        floydWarshall(graph4);
+        // cout << "\nResult for Test Case 4:\n";
+        // floydWarshall(graph4);
     } catch (const std::runtime_error &e) {
         cout << e.what() << '\n'; // For any graph with a negative cycle
     }
