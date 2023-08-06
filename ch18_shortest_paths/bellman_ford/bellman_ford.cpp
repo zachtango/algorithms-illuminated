@@ -163,7 +163,7 @@ int main() {
     al graph2 = {
         { {{1, 1}} },
         { {{2, 2}} },
-        { {{0, -6}}, {{1, -3}} }
+        { {{0, -6}, {1, -3}} }
     };
     int start_node2 = 0;
     std::cout << "Test Case 2: Graph with a negative cycle\n";
@@ -188,7 +188,7 @@ int main() {
 
     // Test Case 3: Large graph
     al graph3 = {
-        { {{1, 3}}, {{2, 5}}, {{3, 2}} },
+        { {{1, 3}, {2, 5}, {3, 2}} },
         { {{2, 1}} },
         { {{3, 6}} },
         { }
