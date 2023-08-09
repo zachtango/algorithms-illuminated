@@ -169,18 +169,15 @@ vector<vector<vector<int>>> reconstruction(const al &graph) {
         cout << '\n';
     }
 
-    function<vector<int>(int, int)> bestPath = [&bestPath, &B, &paths](int s, int v) {
+    function<void(vector<int> &, int, int)> bestPath = [&bestPath, &B, &paths](vector<int> &path, int s, int v) {
         if (B[s][v] == -1) {
-            return vector<int>();
+            return;
         }
         int w = B[s][v];
 
-        vector<int> p1 = bestPath(s, w);
-        p1.push_back(w);
-        vector<int> p2 = bestPath(w, v);
-        p1.insert(p1.end(), p2.begin(), p2.end());
-
-        return p1;
+        bestPath(path, s, w);
+        path.push_back(w);
+        bestPath(path, w, v);
     };
 
     for (int s = 1; s <= n; s++) {
@@ -190,7 +187,8 @@ vector<vector<vector<int>>> reconstruction(const al &graph) {
             }
 
             paths[s][v] = {s};
-            auto p = bestPath(s, v);
+            vector<int> p;
+            bestPath(p, s, v);
             paths[s][v].insert(paths[s][v].end(), p.begin(), p.end());
             paths[s][v].push_back(v);
         }
