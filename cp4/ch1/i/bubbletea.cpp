@@ -13,6 +13,7 @@ int main() {
         ith of next N lines describes toppings that can be mixed with ith tea
             K followed by K integers, in range [1, M]
         
+        PVH buys a student a cup of tea with 1 topping
     */
 
     int N, M;
@@ -45,13 +46,9 @@ int main() {
     int X;
     std::cin >> X;
 
-    int canBuy = X / minOrder;
+    int canBuy = X / minOrder - 1;
 
-    if ( (X % minOrder) < minTea ) {
-        canBuy -= 1;
-    }
-
-    std::cout << canBuy << '\n';
+    std::cout << (canBuy > 0 ? canBuy : 0) << '\n';
     
     return 0;
 }
